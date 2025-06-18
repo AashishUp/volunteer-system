@@ -92,3 +92,43 @@ exports.getApplicants = async (req,res)=>{
         res.status(500).json({message: 'Server error', error: err.message});
     }
 };
+
+exports.updateOpportunity = async (req,res)=>{
+    try{
+        const opportunity = await Opportunity.findById(req.params.id);
+        if (!opportunity) return res.status(404).json({ message: 'Opportunity not found'});
+
+        if(req.user.role !== 'organization' || opportunity.postedBy.toString() !== req.user._id.toString()){
+            return res.status(403).json({message:"Not authorized"});
+        }
+        
+        const updatedFields = req.body;
+
+        const updatedOpportunity = await Opportunity.findByIdAndUpdate(
+            req.params.id,
+            {$set: updatedFields},
+            {new: true}
+        );
+
+        res.json({ message:"Opportunity updated", opportunity: updatedOpportunity});
+    } catch (err){
+        res.status(500).json({message: 'Server error', error: err.message});
+    }
+};
+
+exports.deleteOpportunity = async (req, res)=>{
+    try{
+        const opportunity = await Opportunity.findById(req.params.id);
+        if(!opportunity) return res.status(404).json({message:'Opportunity not found'});
+
+        if(req.user.role !== 'organization' || opportunity.postedBy.toString()!== req.user._id.toString()){
+            res.status(403).json("Not authorized");
+        }
+        
+        await opportunity.deleteOne();
+
+        res.json({message: 'Opportunity deleted'});
+    } catch (err){
+        res.status(500).json({message:'Server error', error:err.message});
+    }
+};
