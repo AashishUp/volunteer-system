@@ -21,7 +21,7 @@ exports.registerUser = async (req, res)=>{
             user: {id: user._id, name: user.name, email: user.email, role: user.role},
         });
     } catch(err){
-        res.staus(500).json({ message: 'Server error', error: err.message});
+        res.stauts(500).json({ message: 'Server error', error: err.message});
     }
 };
 
