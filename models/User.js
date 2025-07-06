@@ -30,6 +30,20 @@ const userSchema = new mongoose.Schema(
             date: Date,
         },
     ],
+    volunteerHistory: [
+        {
+            opportunity:{
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Opportunity',
+            },
+            organization:{
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'User',
+            },
+            title: String,
+            date: Date,
+        }
+    ],
 },
 {
     timestamps: true,

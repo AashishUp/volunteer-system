@@ -7,7 +7,9 @@ const {
     applyToOpportunity,
     getApplicants,
     updateOpportunity,
-    deleteOpportunity
+    deleteOpportunity,
+    approveApplicant,
+    markAsCompleted
 } = require ('../controllers/opportunityController');
 const protect = require('../middleware/authMiddleware');
 
@@ -21,4 +23,6 @@ router.get('/:id/applicants', protect, getApplicants);
 router.put('/:id', protect, updateOpportunity);
 router.delete('/:id', protect, deleteOpportunity);
 
+router.post('/:id/approve-applicant', protect, approveApplicant);
+router.post('/:id/mark-completed'. protect, markAsCompleted);
 module.exports = router;

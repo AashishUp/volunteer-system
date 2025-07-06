@@ -34,10 +34,20 @@ const opportunitySchema = new mongoose.Schema(
             ref: 'User',
         },
       ],
+      approvedVolunteers: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      }],
+    tags: [
+        {
+        type: String,
+        trim: true
+        }
+    ],
     },
     {
         timestamps: true,
-    }
+    }    
 );
 
 module.exports = mongoose.model("Opportunity", opportunitySchema);
