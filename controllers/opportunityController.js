@@ -191,6 +191,7 @@ exports.markAsCompleted = async (req, res)=>{
             opportunity: opportunity._id,
             organization: opportunity.postedBy._id,
             title: opportunity.title,
+            tags: opportunity.tags,
             date: new Date(),
         });
         
