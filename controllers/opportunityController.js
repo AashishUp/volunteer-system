@@ -231,3 +231,22 @@ exports.getUserDashboard = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+
+exports.searchOpportunities = async (req, res)=>{
+    const { search } = req.query;
+
+    try{
+        const query = {
+            $or:[
+                {title: { $regex: search, $options: 'i'}},
+                { description: { $regex: search, $options:'i' }},
+                {tags: { $regex: search, $options:'i'}}
+            ]
+        };
+
+    const opportunities = await Opportunity.find(query);
+    res.status(200).json(opportunities);
+    } catch (err){
+        res.status(500).json({ message: 'Error fetching opportunities', error: err.message});
+    }
+};

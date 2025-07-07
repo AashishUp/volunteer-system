@@ -11,7 +11,8 @@ const {
     approveApplicant,
     markAsCompleted,
     getRecommendedOpportunities,
-    getUserDashboard
+    getUserDashboard,
+    searchOpportunities
 } = require ('../controllers/opportunityController');
 const protect = require('../middleware/authMiddleware');
 
@@ -31,4 +32,5 @@ router.post('/:id/mark-completed'. protect, markAsCompleted);
 router.get('/recommendations', protect, getRecommendedOpportunities);
 router.get('/dashboard', protect, getUserDashboard);
 
+router.get('/search', searchOpportunities);
 module.exports = router;

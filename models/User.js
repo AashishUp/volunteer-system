@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema(
             date: Date,
         },
     ],
+    tokens: {
+        type: [String],
+        default: []
+    },
     volunteerHistory: [
         {
             opportunity:{
