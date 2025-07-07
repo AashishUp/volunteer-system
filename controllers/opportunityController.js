@@ -1,5 +1,6 @@
 const Opportunity = require('../models/Opportunity');
 const User = require('../models/User');
+const {recommendCosineBased} = require('../utils/recommendCosine');
 
 exports.createOpportunity = async (req, res)=>{
     const {title, description, location, startDate, endDate, requiredSkills}= req.body;
@@ -200,4 +201,33 @@ exports.markAsCompleted = async (req, res)=>{
     } catch(err){
         res.status(500).json({message: 'Seever error', error: err.message});
     }
+};
+
+exports.getRecommendedOpportunities = async(req, res)=>{
+    try{
+        const user= await User.findById(req.user._id).lean();
+        const opportunities = await Opportunity.find({}).lean();
+
+        const recommend = recommendCosineBased(user, opportunities);
+
+        res.status(200).json(recommend);
+    } catch (err){
+        res.status(500).json({ message : 'Server error', error: err.message});
+    }
+};
+
+exports.getUserDashboard = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).lean();
+    const opportunities = await Opportunity.find({}).lean();
+
+    const recommended = recommendCosineBased(user, opportunities);
+
+    res.status(200).json({
+      user,
+      opportunities: recommended
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
 };
