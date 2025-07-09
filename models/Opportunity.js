@@ -23,7 +23,7 @@ const opportunitySchema = new mongoose.Schema(
             required: true,
         },
         requiredSkills:[String],
-        postedBy:{
+        organization:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true,
@@ -41,7 +41,8 @@ const opportunitySchema = new mongoose.Schema(
     tags: [
         {
         type: String,
-        trim: true
+        trim: true,
+        required: true
         }
     ],
     },

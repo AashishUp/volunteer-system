@@ -233,20 +233,55 @@ exports.getUserDashboard = async (req, res) => {
 };
 
 exports.searchOpportunities = async (req, res)=>{
-    const { search } = req.query;
+    const { search, location, organization, fromDate, toDate } = req.query;
 
     try{
-        const query = {
-            $or:[
-                {title: { $regex: search, $options: 'i'}},
-                { description: { $regex: search, $options:'i' }},
-                {tags: { $regex: search, $options:'i'}}
-            ]
-        };
+        const query = {};
+        
+        //keyword search for title description, tags
+        if(search){
+            query.$or=[
+                {title: {$regex: search, $options:'i'}},
+                {description: { $regex: search, $options: 'i'}},
+                {tags: { $regex: search, $options: 'i'}},
+            ];
+        }
 
-    const opportunities = await Opportunity.find(query);
-    res.status(200).json(opportunities);
-    } catch (err){
-        res.status(500).json({ message: 'Error fetching opportunities', error: err.message});
+        //location filter
+        if(location){
+            query.location={$regex: location, $options: 'i'};        
+        }
+
+        //organization filter
+         if (organization) {
+      const matchingOrgs = await User.find({
+        name: { $regex: organization, $options: 'i' },
+        role: 'organization'
+      }).select('_id');
+
+      const orgIds = matchingOrgs.map(org => org._id);
+      query.organization = { $in: orgIds };
     }
+
+    if (fromDate|| toDate){
+        query.date ={};
+        if(fromDate) query.date.$gte = new Date(fromDate);
+        if(toDate) query.date.$lte = new Date(toDate);
+    }
+
+    const opportunities = await Opportunity.find(query).populate('organization', 'name');
+    if (opportunities.length === 0){
+        return res.status(200).json({
+            message: 'No results found',
+            data : []
+        });
+    }
+    
+    res.status(200).json({
+        message: 'Match Found',
+        data: opportunities
+    });
+    } catch(err){
+        res.status(500).json({message: 'Error filtering opportunities'});
+    }     
 };
