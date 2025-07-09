@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const authRoutes = require ('./routes/authRoutes');
 const opportunityRoutes = require('./routes/opportunityRoutes');
+const tagRoutes = require('./routes/tagRoutes');
 dotenv.config();
 
 connectDB();
@@ -18,6 +19,8 @@ app.get('/', (req,res)=>{
 app.use('/api/auth', authRoutes);
 
 app.use('/api/opportunities', opportunityRoutes);
+
+app.use('/api/tags', tagRoutes);
 
 const port = process.env.PORT || 5000;
 

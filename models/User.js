@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema(
             date: Date,
         },
     ],
+    interests: {
+        type: [String],
+        default: [],
+    },
     tokens: {
         type: [String],
         default: []
