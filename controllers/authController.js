@@ -4,37 +4,58 @@ const User = require ('../models/User');
 const crypto = require('crypto');
 const sendEmail = require('../utils/sendEmail');
 
-exports.registerUser = async (req, res)=>{
-    const {name, email, password, role} = req.body;
+exports.registerUser = async (req, res) => {
+    const { name, email, password, role, interests } = req.body;
 
-    try{
-        let user = await User.findOne({email});
-        if (user) return res.status(400).json({message : 'User already exists'});
+    try {
+        let user = await User.findOne({ email });
+        if (user) return res.status(400).json({ message: 'User already exists' });
+
+        if (role === 'organization' && !email.endsWith('.org')) {
+            return res.status(400).json({ message: 'Organizations must register with a .org email address' });
+        }
+
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
         const verificationToken = crypto.randomBytes(20).toString('hex');
 
-        user = new User({ name, email, password: hashedPassword, role, interests, emailVerificationToken: verificationToken});
+        user = new User({
+            name,
+            email,
+            password: hashedPassword,
+            role,
+            interests,
+            emailVerificationToken: verificationToken,
+        });
 
-        const token = jwt.sign({id:user._id, role: user.role}, process.env.JWT_SECRET, {expiresIn: '7d'});
+        const token = jwt.sign(
+            { id: user._id, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' }
+        );
 
         user.tokens = [token];
         await user.save();
 
         await sendEmail(
             user.email,
-            'EMAIL VERIFICATION- VOLUNTEER SYSTEM',
+            'EMAIL VERIFICATION - VOLUNTEER SYSTEM',
             `Your verification code is: ${verificationToken}`
         );
-        
+
         res.status(201).json({
             message: 'User registered successfully',
             token,
-            user: {id: user._id, name: user.name, email: user.email, role: user.role},
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            },
         });
-    } catch(err){
-        res.stauts(500).json({ message: 'Server error', error: err.message});
+    } catch (err) {
+        res.status(500).json({ message: 'Server error', error: err.message });
     }
 };
 
