@@ -136,30 +136,60 @@ exports.deleteOpportunity = async (req, res)=>{
     }
 };
 
-exports.approveApplicant = async(req, res)=>{
-    try{
+exports.approveApplicant = async (req, res) => {
+    try {
         const { userId } = req.body;
-        const opportunity = await Opportunity.findById(req.params.id);
+        const opportunity = await Opportunity.findById(req.params.id).populate('postedBy');
 
-        if(!opportunity) return res.status(404).json({message:'Opportunity not found'});
-
-        if(req.user.role!== 'organization' || opportunity.postedBy.toString()!== req.user._id.toString()){
-            return res.staus(403).json({message: 'Not authorized'});
+        if (!opportunity) {
+            return res.status(404).json({ message: 'Opportunity not found' });
         }
 
-        if(!opportunity.applicants.includes(userId)){
-            return res.status(400).json({message: 'User did not apply'});
+        if (req.user.role !== 'organization' || opportunity.postedBy._id.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'Not authorized' });
         }
 
-        if(opportunity.approvedVolunteers.includes(userId)){
-            return res.status(400).json({ message: 'Already approved'});
+        if (!opportunity.applicants.includes(userId)) {
+            return res.status(400).json({ message: 'User did not apply' });
+        }
+
+        if (opportunity.approvedVolunteers.includes(userId)) {
+            return res.status(400).json({ message: 'Already approved' });
         }
 
         opportunity.approvedVolunteers.push(userId);
         await opportunity.save();
-        res.status(200).json({message:'Volunteer approved'});
-    }   catch(err){
-        res.status(500).json({message: 'Server error', error: err.messaga});
+
+        // Send approval email
+        const volunteer = await User.findById(userId);
+        if (volunteer && volunteer.email) {
+            const emailText = `
+Hello ${volunteer.name},
+
+🎉 Congratulations! You've been approved for the volunteer opportunity:
+
+📌 Title: ${opportunity.title}
+📝 Description: ${opportunity.description}
+🏢 Organization: ${opportunity.postedBy.name}
+📅 Date: ${opportunity.date.toDateString()}
+
+You can view more details in your dashboard. We look forward to your participation!
+
+Best regards,  
+Volunteer Recommendation System Team
+            `;
+
+            await sendEmail(
+                volunteer.email,
+                `You're selected for "${opportunity.title}"`,
+                emailText
+            );
+        }
+
+        res.status(200).json({ message: 'Volunteer approved and notified by email' });
+
+    } catch (err) {
+        res.status(500).json({ message: 'Server error', error: err.message });
     }
 };
 
