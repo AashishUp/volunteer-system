@@ -15,12 +15,13 @@ const {
     searchOpportunities
 } = require ('../controllers/opportunityController');
 const protect = require('../middleware/authMiddleware');
+const isVerified = require('../middleware/isVerified');
 
 router.get('/', getAllOpportunities);
-router.post('/', protect, createOpportunity);
+router.post('/', protect, isVerified, createOpportunity);
 router.get('/my', protect, getMyOpportunities);
 
-router.post('/:id/apply', protect, applyToOpportunity);
+router.post('/:id/apply', protect, isVerified, applyToOpportunity);
 router.get('/:id/applicants', protect, getApplicants);
 
 router.put('/:id', protect, updateOpportunity);
